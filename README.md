@@ -1,3 +1,3 @@
 ## Installation
 
-    cordova plugin add cordova-plugin-printer
+    cordova plugin add cordova-plugin-raw-printer

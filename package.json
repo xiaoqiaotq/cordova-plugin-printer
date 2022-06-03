@@ -1,5 +1,5 @@
 {
-  "name": "cordova-plugin-printer",
+  "name": "cordova-plugin-raw-printer",
   "version": "0.0.1",
   "description": "cordova-plugin-printer esc",
   "author": "xiaoqiaotq@gmail.com",
@@ -8,7 +8,7 @@
     "url": "https://github.com/xiaoqiaotq/cordova-plugin-printer.git"
   },
   "cordova": {
-    "id": "cordova-plugin-printer",
+    "id": "cordova-plugin-raw-printer",
     "platforms": [
       "android"
     ]

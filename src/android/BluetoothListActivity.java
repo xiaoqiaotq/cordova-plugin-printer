@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,7 +18,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 
 import java.util.Set;
 
@@ -31,15 +31,28 @@ public class BluetoothListActivity extends Activity {
     private ArrayAdapter<String> mDevicesArrayAdapter;
     public static final String EXTRA_DEVICE_ADDRESS = "address";
     public static final int REQUEST_ENABLE_BT = 2;
+    // For retrieving R.* resources, from the actual app package
+    // (we can't use actual.application.package.R.* in our code as we
+    // don't know the applciation package name when writing this plugin).
+    private String package_name;
+    private Resources resources;
+
+
+    private int getResourceId (String typeAndName)
+    {
+        if(package_name == null) package_name = getApplication().getPackageName();
+        if(resources == null) resources = getApplication().getResources();
+        return resources.getIdentifier(typeAndName, null, package_name);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setContentView(R.layout.dialog_bluetooth_list);
+        setContentView(getResourceId("layout/dialog_bluetooth_list"));
 
-        lvPairedDevice = findViewById(R.id.lvPairedDevices);
-        findViewById(R.id.btBluetoothScan).setOnClickListener(new View.OnClickListener() {
+        lvPairedDevice = findViewById(getResourceId("id/lvPairedDevices"));
+        findViewById(getResourceId("id/btBluetoothScan")).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 view.setVisibility(View.GONE);
@@ -97,7 +110,7 @@ public class BluetoothListActivity extends Activity {
      */
     protected void getDeviceList() {
         // 初始化一个数组适配器，用来显示已匹对和未匹对的设备
-        mDevicesArrayAdapter = new ArrayAdapter<>(this, R.layout.bluetooth_device_name_item);
+        mDevicesArrayAdapter = new ArrayAdapter<>(this, getResourceId("layout/bluetooth_device_name_item"));
         lvPairedDevice.setAdapter(mDevicesArrayAdapter);
         lvPairedDevice.setOnItemClickListener(mDeviceClickListener);
         // 已匹对数据

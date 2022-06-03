@@ -95,8 +95,12 @@ public class PrintPlugin extends CordovaPlugin {
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
       if (action.equals("print")) {
-        byte[] message = (byte[]) args.get(0);
-        printerCommand = args.getString(1);
+
+          Toast.makeText(cordova.getContext(), args, Toast.LENGTH_SHORT).show();
+
+//          byte[] message = (byte[]) args.get(0);
+//        printerCommand = args.getString(1);
+        printerCommand = "ESC";
 
         //先判断打印机是否连接
         if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id] == null ||
@@ -104,7 +108,8 @@ public class PrintPlugin extends CordovaPlugin {
           Toast.makeText(cordova.getContext(), "请先连接打印机", Toast.LENGTH_SHORT).show();
           chooseBluetooth();
         }else {
-          print(message);
+//            print(message);
+          print(example());
         }
         return true;
       }
@@ -135,6 +140,48 @@ public class PrintPlugin extends CordovaPlugin {
     }
     return vector;
   }
+
+    private byte[] example() {
+        LabelCommand tsc = new LabelCommand();
+        tsc.addSize(41, 30); // 设置标签尺寸，按照实际尺寸设置
+        tsc.addGap(1); // 设置标签间隙，按照实际尺寸设置，如果为无间隙纸则设置为0
+        tsc.addDirection(LabelCommand.DIRECTION.FORWARD, LabelCommand.MIRROR.NORMAL);// 设置打印方向
+        tsc.addQueryPrinterStatus(LabelCommand.RESPONSE_MODE.ON);//开启带Response的打印，用于连续打印
+        tsc.addReference(0, 0);// 设置原点坐标
+        tsc.addTear(EscCommand.ENABLE.ON); // 撕纸模式开启
+        tsc.addCls();// 清除打印缓冲区
+
+        // 绘制简体中文
+        tsc.addText(30, 30, LabelCommand.FONTTYPE.SIMPLIFIED_CHINESE, LabelCommand.ROTATION.ROTATION_0, LabelCommand.FONTMUL.MUL_1, LabelCommand.FONTMUL.MUL_1,
+                "这是标题");
+        tsc.addText(200, 30, LabelCommand.FONTTYPE.SIMPLIFIED_CHINESE, LabelCommand.ROTATION.ROTATION_0, LabelCommand.FONTMUL.MUL_1, LabelCommand.FONTMUL.MUL_1,
+                "序号：" + "1");
+
+        tsc.addText(30, 90, LabelCommand.FONTTYPE.SIMPLIFIED_CHINESE, LabelCommand.ROTATION.ROTATION_0, LabelCommand.FONTMUL.MUL_1, LabelCommand.FONTMUL.MUL_1,
+                "价格：" + "99.00");
+        tsc.addText(30, 140, LabelCommand.FONTTYPE.SIMPLIFIED_CHINESE, LabelCommand.ROTATION.ROTATION_0, LabelCommand.FONTMUL.MUL_1, LabelCommand.FONTMUL.MUL_1,
+                "数量：" + "99");
+        tsc.addText(30, 190, LabelCommand.FONTTYPE.SIMPLIFIED_CHINESE, LabelCommand.ROTATION.ROTATION_0, LabelCommand.FONTMUL.MUL_1, LabelCommand.FONTMUL.MUL_1,
+                "日期：" + "2020-02-02");
+
+        // 绘制图片
+//        Bitmap b = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+//        tsc.addBitmap(20, 50, LabelCommand.BITMAP_MODE.OVERWRITE, b.getWidth(), b);
+
+        //二维码
+        tsc.addQRCode(200, 90, LabelCommand.EEC.LEVEL_L, 4, LabelCommand.ROTATION.ROTATION_0, "www.baidu.com");
+
+        tsc.addPrint(1, 1); // 打印标签
+        tsc.addSound(2, 100); // 打印标签后 蜂鸣器响
+
+        /* 发送数据 */
+        Vector<Byte> command = tsc.getCommand();
+        byte[] bytes = new byte[command.size()];
+        for (int i = 0; i < command.size(); i++) {
+            bytes[i] = command.get(i);
+        }
+        return bytes;
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

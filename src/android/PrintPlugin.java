@@ -1,10 +1,12 @@
 package org.xiaoqiaotq.cordova.printer;
 
 import static android.app.Activity.RESULT_OK;
+import static android.bluetooth.BluetoothAdapter.EXTRA_STATE;
 import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_DETACHED;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -263,6 +265,8 @@ public class PrintPlugin extends CordovaPlugin {
         IntentFilter filter = new IntentFilter();
         filter.addAction(DeviceConnFactoryManager.ACTION_QUERY_PRINTER_STATE);
         filter.addAction(DeviceConnFactoryManager.ACTION_CONN_STATE);
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+
         cordova.getContext().registerReceiver(receiver, filter);
     }
 
@@ -297,7 +301,13 @@ public class PrintPlugin extends CordovaPlugin {
                 /* Usb连接断开、蓝牙连接断开广播 */
             } else if (ACTION_USB_DEVICE_DETACHED.equals(action)) {
                 mHandler.obtainMessage(CONN_STATE_DISCONN).sendToTarget();
+            } else if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                if (intent.getIntExtra(EXTRA_STATE,-1)==BluetoothAdapter.STATE_OFF ){//蓝牙被关闭时强制打开
+                    DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id] = null;
+//                    closePort();
+                }
             }
+
         }
     };
 

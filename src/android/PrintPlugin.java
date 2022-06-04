@@ -22,7 +22,9 @@ import com.printer.command.EscCommand;
 import com.printer.command.LabelCommand;
 
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaWebView;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -77,6 +79,16 @@ public class PrintPlugin extends CordovaPlugin {
 
     String printerCommand;
 
+    public static Context applicationContext;
+
+
+    @Override
+    public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+        applicationContext = this.cordova.getActivity().getApplicationContext();
+
+        super.initialize(cordova, webView);
+    }
+
     private void checkPermission() {
         for (String permission : permissions) {
             if (PackageManager.PERMISSION_GRANTED !=  cordova.getContext().checkSelfPermission( permission)) {
@@ -96,11 +108,10 @@ public class PrintPlugin extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
       if (action.equals("print")) {
 
-          Toast.makeText(cordova.getContext(), args, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(cordova.getContext(), args.toString(), Toast.LENGTH_SHORT).show();
 
-//          byte[] message = (byte[]) args.get(0);
-//        printerCommand = args.getString(1);
-        printerCommand = "ESC";
+        JSONArray jsonArray =  args.getJSONArray(0);
+        printerCommand = args.getString(1);
 
         //先判断打印机是否连接
         if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id] == null ||
@@ -108,12 +119,22 @@ public class PrintPlugin extends CordovaPlugin {
           Toast.makeText(cordova.getContext(), "请先连接打印机", Toast.LENGTH_SHORT).show();
           chooseBluetooth();
         }else {
-//            print(message);
-          print(example());
+          print(toBytes(jsonArray));
+//          print(example());
         }
         return true;
       }
       return false;
+    }
+
+    public byte[] toBytes(JSONArray jsonArray) throws JSONException {
+        byte[] bytes = new byte[jsonArray.length()];
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            bytes[i]=(byte)(((Integer)jsonArray.get(i)) & 0xFF);
+        }
+        return bytes;
+
     }
 
 

@@ -216,7 +216,7 @@ public class DeviceConnFactoryManager {
         Intent intent = new Intent(ACTION_CONN_STATE);
         intent.putExtra(STATE, state);
         intent.putExtra(DEVICE_ID, id);
-        App.getContext().sendBroadcast(intent);
+        PrintPlugin.applicationContext.sendBroadcast(intent);
     }
 
     /**
